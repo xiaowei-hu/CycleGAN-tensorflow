@@ -32,9 +32,9 @@ For example:
 
 ## Prerequisites
 - tensorflow r1.0 or higher version
-- numpy
-- scipy
-- pillow
+- numpy 1.11.0
+- scipy 0.17.0
+- pillow 3.3.0
 
 ## Getting Started
 ### Installation
