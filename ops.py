@@ -10,9 +10,9 @@ from utils import *
 def batch_norm(x, name="batch_norm"):
     return tf.contrib.layers.batch_norm(x, decay=0.9, updates_collections=None, epsilon=1e-5, scale=True, scope=name)
 
-def conv2d(input_, output_dim, ks=4, s=2, stddev=0.02, name="conv2d"):
+def conv2d(input_, output_dim, ks=4, s=2, stddev=0.02, padding='SAME', name="conv2d"):
     with tf.variable_scope(name):
-        return slim.conv2d(input_, output_dim, ks, s, padding='SAME', activation_fn=None,
+        return slim.conv2d(input_, output_dim, ks, s, padding=padding, activation_fn=None,
                             weights_initializer=tf.truncated_normal_initializer(stddev=stddev),
                             biases_initializer=None)
 
