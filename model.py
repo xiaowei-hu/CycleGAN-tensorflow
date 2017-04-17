@@ -52,8 +52,6 @@ class cyclegan(object):
         self.fake_A_ = self.generator(self.fake_B, self.options, False, name="generatorB2A")
         self.fake_A = self.generator(self.real_B, self.options, True, name="generatorA2B")
         self.fake_B_ = self.generator(self.fake_A, self.options, True, name="generatorB2A")
-        self.samplesB = self.generator(self.real_A, self.options, True, name="generatorA2B")
-        self.samplesA = self.generator(self.real_B, self.options, True, name="generatorB2A")
 
         self.DB_fake = self.discriminator(self.fake_B, self.options, reuse=True, name="discriminatorB")
         self.DA_fake = self.discriminator(self.fake_A, self.options, reuse=True, name="discriminatorA")
@@ -216,13 +214,13 @@ class cyclegan(object):
         sample_images = [load_data(batch_file, False, True) for batch_file in batch_files]
         sample_images = np.array(sample_images).astype(np.float32)
 
-        samplesA, samplesB = self.sess.run(
-            [self.samplesA, self.samplesB],
+        fake_A, fake_B = self.sess.run(
+            [self.fake_A, self.fake_B],
             feed_dict={self.real_data: sample_images}
         )
-        save_images(samplesA, [self.batch_size, 1],
+        save_images(fake_A, [self.batch_size, 1],
                     './{}/A_{:02d}_{:04d}.jpg'.format(sample_dir, epoch, idx))
-        save_images(samplesB, [self.batch_size, 1],
+        save_images(fake_B, [self.batch_size, 1],
                     './{}/B_{:02d}_{:04d}.jpg'.format(sample_dir, epoch, idx))
 
     def test(self, args):
