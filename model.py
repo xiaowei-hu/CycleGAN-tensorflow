@@ -14,7 +14,7 @@ class pix2pix(object):
     def __init__(self, sess, image_size=256, batch_size=1,
                  gf_dim=32, df_dim=64, L1_lambda=10, input_c_dim=3,
                  output_c_dim=3, use_resnet=True, use_lsgan=True,
-                 dataset_dir='cityscapes2gta5'):
+                 dataset_dir='horse2zebra'):
         """
 
         Args:
