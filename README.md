@@ -11,19 +11,19 @@ see [paper](https://arxiv.org/pdf/1703.10593.pdf) , for example:
 
 ## Applications
 ### Monet Paintings to Photos
-<img src="https://junyanz.github.io/CycleGAN/images/painting2photo.jpg" width="1000px"/>
+<img src="imgs/painting2photo.jpg" width="1000px"/>
 
 ### Collection Style Transfer
-<img src="https://junyanz.github.io/CycleGAN/images/photo2painting.jpg" width="1000px"/>
+<img src="imgs/photo2painting.jpg" width="1000px"/>
 
 ### Object Transfiguration
-<img src="https://junyanz.github.io/CycleGAN/images/objects.jpg" width="1000px"/>
+<img src="imgs/objects.jpg" width="1000px"/>
 
 ### Season Transfer
-<img src="https://junyanz.github.io/CycleGAN/images/season.jpg" width="1000px"/>
+<img src="imgs/season.jpg" width="1000px"/>
 
 ### Photo Enhancement: iPhone photo to DSLR photo
-<img src="https://junyanz.github.io/CycleGAN/images/photo_enhancement.jpg" width="1000px"/>
+<img src="imgs/photo_enhancement.jpg" width="1000px"/>
 
 
 
@@ -95,7 +95,7 @@ bash ./datasets/download_dataset.sh dataset_name
 - `iphone2dslr_flower`: both classe of images were downlaoded from Flickr. The training set size of each class is iPhone:1813, DSLR:3316. See more details in our paper.
 
 ## Failure cases
-<img align="left" style="padding:10px" src="https://junyanz.github.io/CycleGAN/images/failure_putin.jpg" width=320>
+<img align="left" style="padding:10px" src="imgs/failure_putin.jpg" width=320>
 
 Our model does not work well when a test image looks unusual compared to training images, as shown in the left figure.  See more typical failure cases [here](https://junyanz.github.io/CycleGAN/images/failures.jpg). On translation tasks that involve color and texture changes, like many of those reported above, the method often succeeds. We have also explored tasks that require geometric changes, with little success. For example, on the task of `dog<->cat` transfiguration, the learned translation degenerates to making minimal changes to the input. We also observe a lingering gap between the results achievable with paired training data and those achieved by our unpaired method. In some cases, this gap may be very hard -- or even impossible,-- to close: for example, our method sometimes permutes the labels for tree and building in the output of the cityscapes photos->labels task.
 
