@@ -37,7 +37,7 @@ class cyclegan(object):
 
         self._build_model()
         self.saver = tf.train.Saver()
-        self.pool = ImagePool(maxsize=args.max_size)
+        self.pool = ImagePool(args.max_size)
 
     def _build_model(self):
         self.real_data = tf.placeholder(tf.float32,
