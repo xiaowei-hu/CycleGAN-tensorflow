@@ -6,8 +6,8 @@
 
 Tensorflow implementation for learning an image-to-image translation **without** input-output pairs.
 The method is proposed by [Jun-Yan Zhu](https://people.eecs.berkeley.edu/~junyanz/) in 
-[Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networkssee]
-(https://arxiv.org/pdf/1703.10593.pdf). For example:
+[Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networkssee](https://arxiv.org/pdf/1703.10593.pdf). 
+For example:
 
 <img src="https://junyanz.github.io/CycleGAN/images/teaser_high_res.jpg" width="1000px"/>
 
