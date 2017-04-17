@@ -72,8 +72,7 @@ To train a model,
 ```bash
 python main.py --dataset_dir=/path/to/data/ 
 ```
-Models are saved to `./checkpoints/expt_name` (can be changed by passing `checkpoint_dir=your_dir` in train.lua).  
-See `opt_train` in `options.lua` for additional training options.
+Models are saved to `./checkpoints/` (can be changed by passing `--checkpoint_dir=your_dir`).  
 
 To test the model,
 ```bash
