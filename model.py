@@ -42,7 +42,7 @@ class pix2pix(object):
         if use_lsgan:
             self.criterionGAN = mae_criterion
         else:
-            self.criterionGAN = cross_entropy_criterion
+            self.criterionGAN = sce_criterion
 
         OPTIONS = namedtuple('OPTIONS', 'batch_size image_size gf_dim df_dim output_c_dim')
         self.options = OPTIONS._make((batch_size, image_size, gf_dim, df_dim, output_c_dim))
