@@ -48,6 +48,10 @@ bash ./download_dataset.sh horse2zebra
 ```bash
 python main.py --dataset_dir=horse2zebra
 ```
+- Use tensorboard to visualize the training details:
+```bash
+tensorboard --logdir=./logs
+```
 
 ### Test
 - Finally, test the model:
