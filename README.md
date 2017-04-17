@@ -70,7 +70,7 @@ Download the pre-trained models with the following script.
 ## Training and Test Details
 To train a model,  
 ```bash
-python main.py --dataset_dir=/path/to/data/ --
+python main.py --dataset_dir=/path/to/data/ 
 ```
 Models are saved to `./checkpoints/expt_name` (can be changed by passing `checkpoint_dir=your_dir` in train.lua).  
 See `opt_train` in `options.lua` for additional training options.
@@ -83,7 +83,7 @@ python main.py --dataset_dir=/path/to/data/ --phase=test --which_direction=AtoB/
 ## Datasets
 Download the datasets using the following script:
 ```bash
-bash ./datasets/download_dataset.sh dataset_name
+bash ./download_dataset.sh dataset_name
 ```
 - `facades`: 400 images from the [CMP Facades dataset](http://cmp.felk.cvut.cz/~tylecr1/facade/).
 - `cityscapes`: 2975 images from the [Cityscapes training set](https://www.cityscapes-dataset.com/).
@@ -97,7 +97,7 @@ bash ./datasets/download_dataset.sh dataset_name
 ## Failure cases
 <img align="left" style="padding:10px" src="imgs/failure_putin.jpg" width=320>
 
-Our model does not work well when a test image looks unusual compared to training images, as shown in the left figure.  See more typical failure cases [here](https://junyanz.github.io/CycleGAN/images/failures.jpg). On translation tasks that involve color and texture changes, like many of those reported above, the method often succeeds. We have also explored tasks that require geometric changes, with little success. For example, on the task of `dog<->cat` transfiguration, the learned translation degenerates to making minimal changes to the input. We also observe a lingering gap between the results achievable with paired training data and those achieved by our unpaired method. In some cases, this gap may be very hard -- or even impossible,-- to close: for example, our method sometimes permutes the labels for tree and building in the output of the cityscapes photos->labels task.
+Our model does not work well when a test image looks unusual compared to training images as shown in the left figure.  See more typical failure cases [here](https://junyanz.github.io/CycleGAN/images/failures.jpg). On translation tasks that involve color and texture changes, like many of those reported above, the method often succeeds. We have also explored tasks that require geometric changes, with little success. For example, on the task of `dog<->cat` transfiguration, the learned translation degenerates to making minimal changes to the input. We also observe a lingering gap between the results achievable with paired training data and those achieved by our unpaired method. In some cases, this gap may be very hard or even impossible, to close: for example, our method sometimes permutes the labels for tree and building in the output of the cityscapes photos->labels task.
 
 
 
