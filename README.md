@@ -55,18 +55,6 @@ python main.py --dataset_dir=horse2zebra
 python main.py --dataset_dir=horse2zebra --phase=test --which_direction=AtoB
 ```
 
-
-## Model Zoo
-Download the pre-trained models with the following script.
-
-- `orange2apple` (orange -> apple) and `apple2orange`: trained on ImageNet categories `apple` and `orange`.
-- `horse2zebra` (horse -> zebra) and `zebra2horse` (zebra -> horse): trained on ImageNet categories `horse` and `zebra`.
-- `style_monet` (landscape photo -> Monet painting style),  `style_vangogh` (landscape photo  -> Van Gogh painting style), `style_ukiyoe` (landscape photo  -> Ukiyo-e painting style), `style_cezanne` (landscape photo  -> Cezanne painting style): trained on paintings and Flickr landscape photos.
-- `monet2photo` (Monet paintings -> real landscape): trained on paintings and Flickr landscape photographs.
-- `cityscapes_photo2label` (street scene -> label) and `cityscapes_label2photo` (label -> street scene): trained on the Cityscapes dataset.
-- `map2sat` (map -> aerial photo) and `sat2map` (aerial photo -> map): trained on Google maps.
-- `iphone2dslr_flower` (iPhone photos of flower -> DSLR photos of flower): trained on Flickr photos.
-
 ## Training and Test Details
 To train a model,  
 ```bash
