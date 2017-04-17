@@ -31,11 +31,14 @@ For example:
 -->
 
 ## Prerequisites
-tensorflow r1.0 or higher version
+- tensorflow r1.0 or higher version
+- numpy
+- scipy
+- pillow
 
 ## Getting Started
 ### Installation
-- Install tensorflow and dependencies from https://github.com/tensorflow/tensorflow
+- Install tensorflow from https://github.com/tensorflow/tensorflow
 - Clone this repo:
 ```bash
 git clone https://github.com/xhujoy/CycleGAN-tensorflow
