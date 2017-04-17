@@ -16,7 +16,7 @@ pp = pprint.PrettyPrinter()
 get_stddev = lambda x, k_h, k_w: 1/math.sqrt(k_w*k_h*x.get_shape()[-1])
 
 # -----------------------------
-# new added functions for pix2pix
+# new added functions for cyclegan
 class ImagePool(object):
     def __init__(self, maxsize=50):
         self.maxsize = maxsize
@@ -106,6 +106,16 @@ def merge(images, size):
 
 def imsave(images, size, path):
     return scipy.misc.imsave(path, merge(images, size))
+
+def center_crop(x, crop_h, crop_w,
+                resize_h=64, resize_w=64):
+  if crop_w is None:
+    crop_w = crop_h
+  h, w = x.shape[:2]
+  j = int(round((h - crop_h)/2.))
+  i = int(round((w - crop_w)/2.))
+  return scipy.misc.imresize(
+      x[j:j+crop_h, i:i+crop_w], [resize_h, resize_w])
 
 def transform(image, npx=64, is_crop=True, resize_w=64):
     # npx : # of pixels width/height of image

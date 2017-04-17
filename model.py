@@ -10,52 +10,40 @@ from collections import namedtuple
 from module import *
 from utils import *
 
-class pix2pix(object):
-    def __init__(self, sess, image_size=256, batch_size=1,
-                 gf_dim=32, df_dim=64, L1_lambda=10, input_c_dim=3,
-                 output_c_dim=3, use_resnet=True, use_lsgan=True,
-                 dataset_dir='horse2zebra'):
-        """
-
-        Args:
-            sess: TensorFlow session
-            batch_size: The size of batch. Should be specified before training.
-            gf_dim: (optional) Dimension of gen filters in first conv layer. [64]
-            df_dim: (optional) Dimension of discrim filters in first conv layer. [64]
-            input_c_dim: (optional) Dimension of input image color. For grayscale input, set to 1. [3]
-            output_c_dim: (optional) Dimension of output image color. For grayscale input, set to 1. [3]
-        """
+class cyclegan(object):
+    def __init__(self, sess, args):
         self.sess = sess
-        self.is_grayscale = (input_c_dim == 1)
-        self.batch_size = batch_size
-        self.image_size = image_size
-        self.input_c_dim = input_c_dim
-        self.output_c_dim = output_c_dim
-        self.L1_lambda = L1_lambda
-        self.dataset_dir = dataset_dir
+        self.batch_size = args.batch_size
+        self.image_size = args.fine_size
+        self.input_c_dim = args.input_nc
+        self.output_c_dim = args.output_nc
+        self.L1_lambda = args.L1_lambda
+        self.dataset_dir = args.dataset_dir
 
         self.discriminator = discriminator
-        if use_resnet:
+        if args.use_resnet:
             self.generator = generator_resnet
         else:
             self.generator = generator_unet
-        if use_lsgan:
+        if args.use_lsgan:
             self.criterionGAN = mae_criterion
         else:
             self.criterionGAN = sce_criterion
 
-        OPTIONS = namedtuple('OPTIONS', 'batch_size image_size gf_dim df_dim output_c_dim')
-        self.options = OPTIONS._make((batch_size, image_size, gf_dim, df_dim, output_c_dim))
+        OPTIONS = namedtuple('OPTIONS', 'batch_size image_size \
+                              gf_dim df_dim output_c_dim')
+        self.options = OPTIONS._make((args.batch_size, args.fine_size,
+                                      args.ngf, args.ndf, args.output_nc))
 
-        self.build_model()
+        self._build_model()
         self.saver = tf.train.Saver()
-        self.pool = ImagePool(maxsize=50)
+        self.pool = ImagePool(maxsize=args.max_size)
 
-    def build_model(self):
+    def _build_model(self):
         self.real_data = tf.placeholder(tf.float32,
                                         [None, self.image_size, self.image_size,
                                          self.input_c_dim + self.output_c_dim],
-                                        name='real_A_and_B_images')
+                                         name='real_A_and_B_images')
 
         self.real_A = self.real_data[:, :, :, :self.input_c_dim]
         self.real_B = self.real_data[:, :, :, self.input_c_dim:self.input_c_dim + self.output_c_dim]
@@ -125,33 +113,8 @@ class pix2pix(object):
         self.g_vars_b2a = [var for var in t_vars if 'generatorB2A' in var.name]
         for var in t_vars: print var.name
 
-    def load_random_samples(self):
-        dataA = glob('./datasets/{}/*.jpg'.format(self.dataset_dir+'/testA'))
-        dataB = glob('./datasets/{}/*.jpg'.format(self.dataset_dir+'/testB'))
-        np.random.shuffle(dataA)
-        np.random.shuffle(dataB)
-        batch_files = zip(dataA[:self.batch_size], dataB[:self.batch_size])
-        sample = [load_data(batch_file) for batch_file in batch_files]
-
-        if (self.is_grayscale):
-            sample_images = np.array(sample).astype(np.float32)[:, :, :, None]
-        else:
-            sample_images = np.array(sample).astype(np.float32)
-        return sample_images
-
-    def sample_model(self, sample_dir, epoch, idx):
-        sample_images = self.load_random_samples()
-        samplesA, samplesB = self.sess.run(
-            [self.samplesA, self.samplesB],
-            feed_dict={self.real_data: sample_images}
-        )
-        save_images(samplesA, [self.batch_size, 1],
-                    './{}/A_{:02d}_{:04d}.jpg'.format(sample_dir, epoch, idx))
-        save_images(samplesB, [self.batch_size, 1],
-                    './{}/B_{:02d}_{:04d}.jpg'.format(sample_dir, epoch, idx))
-
     def train(self, args):
-        """Train pix2pix"""
+        """Train cyclegan"""
         self.da_optim = tf.train.AdamOptimizer(args.lr, beta1=args.beta1) \
                         .minimize(self.da_loss, var_list=self.da_vars)
         self.db_optim = tf.train.AdamOptimizer(args.lr, beta1=args.beta1) \
@@ -183,11 +146,8 @@ class pix2pix(object):
             for idx in xrange(0, batch_idxs):
                 batch_files = zip(dataA[idx*self.batch_size:(idx+1)*self.batch_size],
                                   dataB[idx*self.batch_size:(idx+1)*self.batch_size])
-                batch = [load_data(batch_file) for batch_file in batch_files]
-                if (self.is_grayscale):
-                    batch_images = np.array(batch).astype(np.float32)[:, :, :, None]
-                else:
-                    batch_images = np.array(batch).astype(np.float32)
+                batch_images = [load_data(batch_file) for batch_file in batch_files]
+                batch_images = np.array(batch_images).astype(np.float32)
 
                 # Forward G network
                 fake_A, fake_B = self.sess.run([self.fake_A, self.fake_B],
@@ -248,8 +208,26 @@ class pix2pix(object):
         else:
             return False
 
+    def sample_model(self, sample_dir, epoch, idx):
+        dataA = glob('./datasets/{}/*.jpg'.format(self.dataset_dir+'/testA'))
+        dataB = glob('./datasets/{}/*.jpg'.format(self.dataset_dir+'/testB'))
+        np.random.shuffle(dataA)
+        np.random.shuffle(dataB)
+        batch_files = zip(dataA[:self.batch_size], dataB[:self.batch_size])
+        sample_images = [load_data(batch_file, False, True) for batch_file in batch_files]
+        sample_images = np.array(sample_images).astype(np.float32)
+
+        samplesA, samplesB = self.sess.run(
+            [self.samplesA, self.samplesB],
+            feed_dict={self.real_data: sample_images}
+        )
+        save_images(samplesA, [self.batch_size, 1],
+                    './{}/A_{:02d}_{:04d}.jpg'.format(sample_dir, epoch, idx))
+        save_images(samplesB, [self.batch_size, 1],
+                    './{}/B_{:02d}_{:04d}.jpg'.format(sample_dir, epoch, idx))
+
     def test(self, args):
-        """Test pix2pix"""
+        """Test cyclegan"""
         init_op = tf.global_variables_initializer()
         self.sess.run(init_op)
         if args.which_direction == 'AtoB':
@@ -266,11 +244,8 @@ class pix2pix(object):
 
         for sample_file in sample_files:
             print 'Processing image: '+sample_file
-            sample = [load_test_data(sample_file)]
-            if (self.is_grayscale):
-                sample_image = np.array(sample).astype(np.float32)[:, :, :, None]
-            else:
-                sample_image = np.array(sample).astype(np.float32)
+            sample_image = [load_test_data(sample_file)]
+            sample_image = np.array(sample_image).astype(np.float32)
             if args.which_direction == 'AtoB':
                 fake_B = self.sess.run(self.testB, feed_dict={self.test_A: sample_image})
                 save_images(fake_B, [1, 1], '{}/A2B_{}' \

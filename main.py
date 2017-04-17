@@ -2,9 +2,8 @@ import argparse
 import os
 import scipy.misc
 import numpy as np
-
-from model import pix2pix
 import tensorflow as tf
+from model import cyclegan
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--dataset_dir', dest='dataset_dir', default='horse2zebra', help='path of the dataset')
@@ -35,6 +34,7 @@ parser.add_argument('--test_dir', dest='test_dir', default='./test', help='test 
 parser.add_argument('--L1_lambda', dest='L1_lambda', type=float, default=10.0, help='weight on L1 term in objective')
 parser.add_argument('--use_resnet', dest='use_resnet', type=bool, default=True, help='generation network using reidule block')
 parser.add_argument('--use_lsgan', dest='use_lsgan', type=bool, default=True, help='gan loss defined in lsgan')
+parser.add_argument('--max_size', dest='max_size', type=int, default=50, help='max size of image pool, 0 means do not use image pool')
 
 args = parser.parse_args()
 
@@ -47,14 +47,9 @@ def main(_):
         os.makedirs(args.test_dir)
 
     with tf.Session() as sess:
-        model = pix2pix(sess, image_size=args.fine_size, batch_size=args.batch_size,
-                        gf_dim=args.ngf, df_dim=args.ndf, L1_lambda=10, use_resnet=True,
-                        use_lsgan=True, dataset_dir=args.dataset_dir)
-
-        if args.phase == 'train':
-            model.train(args)
-        else:
-            model.test(args)
+        model = cyclegan(sess, args)
+        model.train(args) if args.phase == 'train' \
+            else model.test(args)
 
 if __name__ == '__main__':
     tf.app.run()
