@@ -11,6 +11,7 @@ For example:
 
 <img src="https://junyanz.github.io/CycleGAN/images/teaser_high_res.jpg" width="1000px"/>
 
+<!--
 ## Applications
 ### Monet Paintings to Photos
 <img src="imgs/painting2photo.jpg" width="1000px"/>
@@ -27,7 +28,7 @@ For example:
 ### Photo Enhancement: iPhone photo to DSLR photo
 <img src="imgs/photo_enhancement.jpg" width="1000px"/>
 
-
+-->
 
 ## Prerequisites
 tensorflow r1.0 or higher version
