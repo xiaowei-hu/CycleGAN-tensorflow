@@ -1,7 +1,7 @@
-<!-- <img src='imgs/horse2zebra.gif' align="right" width=384> -->
+<!-- <img src='imgs/horse2zebra.gif' align="right" width=384> 
 
 <br><br><br>
-
+-->
 # CycleGAN
 
 Tensorflow implementation for learning an image-to-image translation **without** input-output pairs.
