@@ -9,6 +9,17 @@ from utils import *
 def batch_norm(x, name="batch_norm"):
     return tf.contrib.layers.batch_norm(x, decay=0.9, updates_collections=None, epsilon=1e-5, scale=True, scope=name)
 
+def instance_norm(x, name="instance_norm"):
+    with tf.variable_scope(name):
+        depth = input.get_shape()[3]
+        scale = _weights("scale", [depth], mean=1.0)
+        offset = _biases("offset", [depth])
+        mean, variance = tf.nn.moments(input, axes=[1,2], keep_dims=True)
+        epsilon = 1e-5
+        inv = tf.rsqrt(variance + epsilon)
+        normalized = (input-mean)*inv
+        return scale*normalized + offset
+
 def conv2d(input_, output_dim, ks=4, s=2, stddev=0.02, padding='SAME', name="conv2d"):
     with tf.variable_scope(name):
         return slim.conv2d(input_, output_dim, ks, s, padding=padding, activation_fn=None,
@@ -22,7 +33,7 @@ def deconv2d(input_, output_dim, ks=4, s=2, stddev=0.02, name="deconv2d"):
                                     biases_initializer=None)
 
 def lrelu(x, leak=0.2, name="lrelu"):
-  return tf.maximum(x, leak*x)
+    return tf.maximum(x, leak*x)
 
 def linear(input_, output_size, scope=None, stddev=0.02, bias_start=0.0, with_w=False):
 
