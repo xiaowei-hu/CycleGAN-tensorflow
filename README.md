@@ -52,7 +52,7 @@ bash ./download_dataset.sh horse2zebra
 ```
 - Train a model:
 ```bash
-python main.py --dataset_dir=horse2zebra
+CUDA_VISIBLE_DEVICES=0 python main.py --dataset_dir=horse2zebra
 ```
 - Use tensorboard to visualize the training details:
 ```bash
@@ -62,19 +62,19 @@ tensorboard --logdir=./logs
 ### Test
 - Finally, test the model:
 ```bash
-python main.py --dataset_dir=horse2zebra --phase=test --which_direction=AtoB
+CUDA_VISIBLE_DEVICES=0 python main.py --dataset_dir=horse2zebra --phase=test --which_direction=AtoB
 ```
 
 ## Training and Test Details
 To train a model,  
 ```bash
-python main.py --dataset_dir=/path/to/data/ 
+CUDA_VISIBLE_DEVICES=0 python main.py --dataset_dir=/path/to/data/ 
 ```
 Models are saved to `./checkpoints/` (can be changed by passing `--checkpoint_dir=your_dir`).  
 
 To test the model,
 ```bash
-python main.py --dataset_dir=/path/to/data/ --phase=test --which_direction=AtoB/BtoA
+CUDA_VISIBLE_DEVICES=0 python main.py --dataset_dir=/path/to/data/ --phase=test --which_direction=AtoB/BtoA
 ```
 
 ## Datasets
