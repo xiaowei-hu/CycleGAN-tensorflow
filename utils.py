@@ -29,7 +29,7 @@ class ImagePool(object):
             self.images.append(image)
             self.num_img=self.num_img+1
             return image
-        if np.random.rand > 0.5:
+        if np.random.rand() > 0.5:
             idx = int(np.random.rand()*self.maxsize)
             tmp = copy.copy(self.images[idx])
             self.images[idx] = image
