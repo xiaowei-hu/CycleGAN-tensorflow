@@ -35,7 +35,7 @@ def generator_unet(image, options, reuse=False, name="generator"):
             assert tf.get_variable_scope().reuse == False
 
         # image is (256 x 256 x input_c_dim)
-        e1 = conv2d(image, options.gf_dim, name='g_e1_conv')
+        e1 = instance_norm(conv2d(image, options.gf_dim, name='g_e1_conv'))
         # e1 is (128 x 128 x self.gf_dim)
         e2 = instance_norm(conv2d(lrelu(e1), options.gf_dim*2, name='g_e2_conv'), 'g_bn_e2')
         # e2 is (64 x 64 x self.gf_dim*2)
@@ -53,15 +53,15 @@ def generator_unet(image, options, reuse=False, name="generator"):
         # e8 is (1 x 1 x self.gf_dim*8)
 
         d1 = deconv2d(tf.nn.relu(e8), options.gf_dim*8, name='g_d1')
-        d1 = tf.concat([tf.nn.dropout(instance_norm(d1, 'g_bn_d1'), 0.5), e7], 3)
+        d1 = tf.concat([instance_norm(d1, 'g_bn_d1'), e7], 3)
         # d1 is (2 x 2 x self.gf_dim*8*2)
 
         d2 = deconv2d(tf.nn.relu(d1), options.gf_dim*8, name='g_d2')
-        d2 = tf.concat([tf.nn.dropout(instance_norm(d2, 'g_bn_d2'), 0.5), e6], 3)
+        d2 = tf.concat([(instance_norm(d2, 'g_bn_d2'), e6], 3)
         # d2 is (4 x 4 x self.gf_dim*8*2)
 
         d3 = deconv2d(tf.nn.relu(d2), options.gf_dim*8, name='g_d3')
-        d3 = tf.concat([tf.nn.dropout(instance_norm(d3, 'g_bn_d3'), 0.5), e5], 3)
+        d3 = tf.concat([instance_norm(d3, 'g_bn_d3'), e5], 3)
         # d3 is (8 x 8 x self.gf_dim*8*2)
 
         d4 = deconv2d(tf.nn.relu(d3), options.gf_dim*8, name='g_d4')
@@ -127,8 +127,7 @@ def generator_resnet(image, options, reuse=False, name="generator"):
         d2 = deconv2d(d1, options.gf_dim, 3, 2, name='g_d2_dc')
         d2 = tf.nn.relu(instance_norm(d2, 'g_d2_bn'))
         d2 = tf.pad(d2, [[0, 0], [3, 3], [3, 3], [0, 0]], "REFLECT")
-        pred = conv2d(d2, options.output_c_dim, 7, 1, padding='VALID', name='g_pred_c')
-        pred = tf.nn.tanh(instance_norm(pred, 'g_pred_bn'))
+        pred = tf.nn.tanh(conv2d(d2, options.output_c_dim, 7, 1, padding='VALID', name='g_pred_c'))
 
         return pred
 
