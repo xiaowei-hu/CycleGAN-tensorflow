@@ -57,7 +57,7 @@ def generator_unet(image, options, reuse=False, name="generator"):
         # d1 is (2 x 2 x self.gf_dim*8*2)
 
         d2 = deconv2d(tf.nn.relu(d1), options.gf_dim*8, name='g_d2')
-        d2 = tf.concat([(instance_norm(d2, 'g_bn_d2'), e6], 3)
+        d2 = tf.concat([instance_norm(d2, 'g_bn_d2'), e6], 3)
         # d2 is (4 x 4 x self.gf_dim*8*2)
 
         d3 = deconv2d(tf.nn.relu(d2), options.gf_dim*8, name='g_d3')
