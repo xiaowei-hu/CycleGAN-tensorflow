@@ -27,6 +27,7 @@ def discriminator(image, options, reuse=False, name="discriminator"):
 
 def generator_unet(image, options, reuse=False, name="generator"):
 
+    dropout_rate = 0.5 if options.is_training else 1.0
     with tf.variable_scope(name):
         # image is 256 x 256 x input_c_dim
         if reuse:
@@ -53,14 +54,17 @@ def generator_unet(image, options, reuse=False, name="generator"):
         # e8 is (1 x 1 x self.gf_dim*8)
 
         d1 = deconv2d(tf.nn.relu(e8), options.gf_dim*8, name='g_d1')
+        d1 = tf.nn.dropout(d1, dropout_rate)
         d1 = tf.concat([instance_norm(d1, 'g_bn_d1'), e7], 3)
         # d1 is (2 x 2 x self.gf_dim*8*2)
 
         d2 = deconv2d(tf.nn.relu(d1), options.gf_dim*8, name='g_d2')
+        d2 = tf.nn.dropout(d2, dropout_rate)
         d2 = tf.concat([instance_norm(d2, 'g_bn_d2'), e6], 3)
         # d2 is (4 x 4 x self.gf_dim*8*2)
 
         d3 = deconv2d(tf.nn.relu(d2), options.gf_dim*8, name='g_d3')
+        d3 = tf.nn.dropout(d3, dropout_rate)
         d3 = tf.concat([instance_norm(d3, 'g_bn_d3'), e5], 3)
         # d3 is (8 x 8 x self.gf_dim*8*2)
 

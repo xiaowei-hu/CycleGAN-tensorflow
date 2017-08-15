@@ -32,9 +32,10 @@ class cyclegan(object):
             self.criterionGAN = sce_criterion
 
         OPTIONS = namedtuple('OPTIONS', 'batch_size image_size \
-                              gf_dim df_dim output_c_dim')
+                              gf_dim df_dim output_c_dim is_training')
         self.options = OPTIONS._make((args.batch_size, args.fine_size,
-                                      args.ngf, args.ndf, args.output_nc))
+                                      args.ngf, args.ndf, args.output_nc,
+                                      args.phase == 'train'))
 
         self._build_model()
         self.saver = tf.train.Saver()
@@ -62,6 +63,10 @@ class cyclegan(object):
         self.g_loss_b2a = self.criterionGAN(self.DA_fake, tf.ones_like(self.DA_fake)) \
                           + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
                           + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
+        self.g_loss = self.criterionGAN(self.DA_fake, tf.ones_like(self.DA_fake)) \
+                      + self.criterionGAN(self.DB_fake, tf.ones_like(self.DB_fake)) \
+                      + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
+                      + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
 
         self.fake_A_sample = tf.placeholder(tf.float32,
                                             [None, self.image_size, self.image_size,
@@ -73,26 +78,30 @@ class cyclegan(object):
         self.DA_real = self.discriminator(self.real_A, self.options, reuse=True, name="discriminatorA")
         self.DB_fake_sample = self.discriminator(self.fake_B_sample, self.options, reuse=True, name="discriminatorB")
         self.DA_fake_sample = self.discriminator(self.fake_A_sample, self.options, reuse=True, name="discriminatorA")
+
         self.db_loss_real = self.criterionGAN(self.DB_real, tf.ones_like(self.DB_real))
         self.db_loss_fake = self.criterionGAN(self.DB_fake_sample, tf.zeros_like(self.DB_fake_sample))
         self.db_loss = (self.db_loss_real + self.db_loss_fake) / 2
         self.da_loss_real = self.criterionGAN(self.DA_real, tf.ones_like(self.DA_real))
         self.da_loss_fake = self.criterionGAN(self.DA_fake_sample, tf.zeros_like(self.DA_fake_sample))
         self.da_loss = (self.da_loss_real + self.da_loss_fake) / 2
+        self.d_loss = self.da_loss + self.db_loss
 
-        self.g_a2b_sum = tf.summary.scalar("g_loss_a2b", self.g_loss_a2b)
-        self.g_b2a_sum = tf.summary.scalar("g_loss_b2a", self.g_loss_b2a)
+        self.g_loss_a2b_sum = tf.summary.scalar("g_loss_a2b", self.g_loss_a2b)
+        self.g_loss_b2a_sum = tf.summary.scalar("g_loss_b2a", self.g_loss_b2a)
+        self.g_loss_sum = tf.summary.scalar("g_loss", self.g_loss)
+        self.g_sum = tf.summary.merge([self.g_loss_a2b_sum, self.g_loss_b2a_sum, self.g_loss_sum])
         self.db_loss_sum = tf.summary.scalar("db_loss", self.db_loss)
         self.da_loss_sum = tf.summary.scalar("da_loss", self.da_loss)
+        self.d_loss_sum = tf.summary.scalar("d_loss", self.d_loss)
         self.db_loss_real_sum = tf.summary.scalar("db_loss_real", self.db_loss_real)
         self.db_loss_fake_sum = tf.summary.scalar("db_loss_fake", self.db_loss_fake)
         self.da_loss_real_sum = tf.summary.scalar("da_loss_real", self.da_loss_real)
         self.da_loss_fake_sum = tf.summary.scalar("da_loss_fake", self.da_loss_fake)
-        self.db_sum = tf.summary.merge(
-            [self.db_loss_sum, self.db_loss_real_sum, self.db_loss_fake_sum]
-        )
-        self.da_sum = tf.summary.merge(
-            [self.da_loss_sum, self.da_loss_real_sum, self.da_loss_fake_sum]
+        self.d_sum = tf.summary.merge(
+            [self.da_loss_sum, self.da_loss_real_sum, self.da_loss_fake_sum,
+             self.db_loss_sum, self.db_loss_real_sum, self.db_loss_fake_sum,
+             self.d_loss_sum]
         )
 
         self.test_A = tf.placeholder(tf.float32,
@@ -105,22 +114,17 @@ class cyclegan(object):
         self.testA = self.generator(self.test_B, self.options, True, name="generatorB2A")
 
         t_vars = tf.trainable_variables()
-        self.db_vars = [var for var in t_vars if 'discriminatorB' in var.name]
-        self.da_vars = [var for var in t_vars if 'discriminatorA' in var.name]
-        self.g_vars_a2b = [var for var in t_vars if 'generatorA2B' in var.name]
-        self.g_vars_b2a = [var for var in t_vars if 'generatorB2A' in var.name]
+        self.d_vars = [var for var in t_vars if 'discriminator' in var.name]
+        self.g_vars = [var for var in t_vars if 'generator' in var.name]
         for var in t_vars: print(var.name)
 
     def train(self, args):
         """Train cyclegan"""
-        self.da_optim = tf.train.AdamOptimizer(args.lr, beta1=args.beta1) \
-            .minimize(self.da_loss, var_list=self.da_vars)
-        self.db_optim = tf.train.AdamOptimizer(args.lr, beta1=args.beta1) \
-            .minimize(self.db_loss, var_list=self.db_vars)
-        self.g_a2b_optim = tf.train.AdamOptimizer(args.lr, beta1=args.beta1) \
-            .minimize(self.g_loss_a2b, var_list=self.g_vars_a2b)
-        self.g_b2a_optim = tf.train.AdamOptimizer(args.lr, beta1=args.beta1) \
-            .minimize(self.g_loss_b2a, var_list=self.g_vars_b2a)
+        self.lr = tf.placeholder(tf.float32, None, name='learning_rate')
+        self.d_optim = tf.train.AdamOptimizer(self.lr, beta1=args.beta1) \
+            .minimize(self.d_loss, var_list=self.d_vars)
+        self.g_optim = tf.train.AdamOptimizer(self.lr, beta1=args.beta1) \
+            .minimize(self.g_loss, var_list=self.g_vars)
 
         init_op = tf.global_variables_initializer()
         self.sess.run(init_op)
@@ -129,7 +133,7 @@ class cyclegan(object):
         counter = 1
         start_time = time.time()
 
-        if self.load(args.checkpoint_dir):
+        if args.continue_train and self.load(args.checkpoint_dir):
             print(" [*] Load SUCCESS")
         else:
             print(" [!] Load failed...")
@@ -140,44 +144,38 @@ class cyclegan(object):
             np.random.shuffle(dataA)
             np.random.shuffle(dataB)
             batch_idxs = min(min(len(dataA), len(dataB)), args.train_size) // self.batch_size
+            lr = args.lr if epoch < args.epoch_step else args.lr*(args.epoch-epoch)/(args.epoch-args.epoch_step)
 
             for idx in range(0, batch_idxs):
                 batch_files = list(zip(dataA[idx * self.batch_size:(idx + 1) * self.batch_size],
                                        dataB[idx * self.batch_size:(idx + 1) * self.batch_size]))
-                batch_images = [load_data(batch_file) for batch_file in batch_files]
+                batch_images = [load_train_data(batch_file, args.load_size, args.fine_size) for batch_file in batch_files]
                 batch_images = np.array(batch_images).astype(np.float32)
 
-                # Forward G network
-                fake_A, fake_B = self.sess.run([self.fake_A, self.fake_B],
-                                               feed_dict={self.real_data: batch_images})
+                # Update G network and record fake outputs
+                fake_A, fake_B, _, summary_str = self.sess.run(
+                    [self.fake_A, self.fake_B, self.g_optim, self.g_sum],
+                    feed_dict={self.real_data: batch_images, self.lr: lr})
+                self.writer.add_summary(summary_str, counter)
                 [fake_A, fake_B] = self.pool([fake_A, fake_B])
-                # Update G network
-                _, summary_str = self.sess.run([self.g_a2b_optim, self.g_a2b_sum],
-                                               feed_dict={self.real_data: batch_images})
-                self.writer.add_summary(summary_str, counter)
+
                 # Update D network
-                _, summary_str = self.sess.run([self.db_optim, self.db_sum],
-                                               feed_dict={self.real_data: batch_images,
-                                                          self.fake_B_sample: fake_B})
-                self.writer.add_summary(summary_str, counter)
-                # Update G network
-                _, summary_str = self.sess.run([self.g_b2a_optim, self.g_b2a_sum],
-                                               feed_dict={self.real_data: batch_images})
-                self.writer.add_summary(summary_str, counter)
-                # Update D network
-                _, summary_str = self.sess.run([self.da_optim, self.da_sum],
-                                               feed_dict={self.real_data: batch_images,
-                                                          self.fake_A_sample: fake_A})
+                _, summary_str = self.sess.run(
+                    [self.d_optim, self.d_sum],
+                    feed_dict={self.real_data: batch_images,
+                               self.fake_A_sample: fake_A,
+                               self.fake_B_sample: fake_B,
+                               self.lr: lr})
                 self.writer.add_summary(summary_str, counter)
 
                 counter += 1
                 print(("Epoch: [%2d] [%4d/%4d] time: %4.4f" \
                        % (epoch, idx, batch_idxs, time.time() - start_time)))
 
-                if np.mod(counter, 100) == 1:
+                if np.mod(counter, args.print_freq) == 1:
                     self.sample_model(args.sample_dir, epoch, idx)
 
-                if np.mod(counter, 1000) == 2:
+                if np.mod(counter, args.save_freq) == 2:
                     self.save(args.checkpoint_dir, counter)
 
     def save(self, checkpoint_dir, step):
@@ -212,7 +210,7 @@ class cyclegan(object):
         np.random.shuffle(dataA)
         np.random.shuffle(dataB)
         batch_files = list(zip(dataA[:self.batch_size], dataB[:self.batch_size]))
-        sample_images = [load_data(batch_file, False, True) for batch_file in batch_files]
+        sample_images = [load_train_data(batch_file, is_testing=True) for batch_file in batch_files]
         sample_images = np.array(sample_images).astype(np.float32)
 
         fake_A, fake_B = self.sess.run(
@@ -251,7 +249,7 @@ class cyclegan(object):
 
         for sample_file in sample_files:
             print('Processing image: ' + sample_file)
-            sample_image = [load_test_data(sample_file)]
+            sample_image = [load_test_data(sample_file, args.fine_size)]
             sample_image = np.array(sample_image).astype(np.float32)
             image_path = os.path.join(args.test_dir,
                                       '{0}_{1}'.format(args.which_direction, os.path.basename(sample_file)))
