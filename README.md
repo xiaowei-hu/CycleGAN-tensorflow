@@ -33,25 +33,25 @@ For example in paper:
 ## Update
 The results of this implementation:
 
-<img src="imgs/n02381460_510.jpg" width="230px"/>
-<img src="imgs/AtoB_n02381460_510.jpg" width="230px"/>
-<img src="imgs/n02381460_4530.jpg" width="230px"/>
-<img src="imgs/AtoB_n02381460_4530.jpg" width="230px"/>
-<img src="imgs/n02381460_4660.jpg" width="230px"/>
-<img src="imgs/AtoB_n02381460_4660.jpg" width="230px"/>
-<img src="imgs/n02381460_8980.jpg" width="230px"/>
+<img src="imgs/n02381460_510.jpg" width="230px"/> |
+<img src="imgs/AtoB_n02381460_510.jpg" width="230px"/> |
+<img src="imgs/n02381460_4530.jpg" width="230px"/> |
+<img src="imgs/AtoB_n02381460_4530.jpg" width="230px"/> |
+<img src="imgs/n02381460_4660.jpg" width="230px"/> |
+<img src="imgs/AtoB_n02381460_4660.jpg" width="230px"/> |
+<img src="imgs/n02381460_8980.jpg" width="230px"/> |
 <img src="imgs/AtoB_n02381460_8980.jpg" width="230px"/>
 
-<img src="imgs/n02391049_1760.jpg" width="230px"/>
-<img src="imgs/BtoA_n02391049_1760.jpg" width="230px"/>
-<img src="imgs/n02391049_3070.jpg" width="230px"/>
-<img src="imgs/BtoA_n02391049_3070.jpg" width="230px"/>
-<img src="imgs/n02391049_5100.jpg" width="230px"/>
-<img src="imgs/BtoA_n02391049_5100.jpg" width="230px"/>
-<img src="imgs/n02391049_7150.jpg" width="230px"/>
+<img src="imgs/n02391049_1760.jpg" width="230px"/> |
+<img src="imgs/BtoA_n02391049_1760.jpg" width="230px"/> |
+<img src="imgs/n02391049_3070.jpg" width="230px"/> |
+<img src="imgs/BtoA_n02391049_3070.jpg" width="230px"/> |
+<img src="imgs/n02391049_5100.jpg" width="230px"/> |
+<img src="imgs/BtoA_n02391049_5100.jpg" width="230px"/> |
+<img src="imgs/n02391049_7150.jpg" width="230px"/> |
 <img src="imgs/BtoA_n02391049_7150.jpg" width="230px"/>
 
-You can download the pretrained model from [this](https://1drv.ms/u/s!AroAdu0uts_gj5tA93GnwyfRpvBIDA)
+You can download the pretrained model from [this url](https://1drv.ms/u/s!AroAdu0uts_gj5tA93GnwyfRpvBIDA)
 and extract the rar file to `./checkpoints/`.
 
 
@@ -110,7 +110,7 @@ bash ./download_dataset.sh dataset_name
 - `facades`: 400 images from the [CMP Facades dataset](http://cmp.felk.cvut.cz/~tylecr1/facade/).
 - `cityscapes`: 2975 images from the [Cityscapes training set](https://www.cityscapes-dataset.com/).
 - `maps`: 1096 training images scraped from Google Maps.
-- `horse2zebra`: 939 horse images and 1177 zebra images downloaded from [ImageNet](http://www.image-net.org/) using keywords `wild horse` and `zebra`
+- `horse2zebra`: 939 horse images and 1177 zebra images downloaded from [ImageNet](http://www.image-net.org/) using keywords `wild horse` and `zebra`.
 - `apple2orange`: 996 apple images and 1020 orange images downloaded from [ImageNet](http://www.image-net.org/) using keywords `apple` and `navel orange`.
 - `summer2winter_yosemite`: 1273 summer Yosemite images and 854 winter Yosemite images were downloaded using Flickr API. See more details in our paper.
 - `monet2photo`, `vangogh2photo`, `ukiyoe2photo`, `cezanne2photo`: The art images were downloaded from [Wikiart](https://www.wikiart.org/). The real photos are downloaded from Flickr using combination of tags *landscape* and *landscapephotography*. The training set size of each class is Monet:1074, Cezanne:584, Van Gogh:401, Ukiyo-e:1433, Photographs:6853.
