@@ -4,7 +4,6 @@ import time
 from glob import glob
 import tensorflow as tf
 import numpy as np
-from six.moves import xrange
 from collections import namedtuple
 
 from module import *
@@ -58,15 +57,15 @@ class cyclegan(object):
         self.DB_fake = self.discriminator(self.fake_B, self.options, reuse=False, name="discriminatorB")
         self.DA_fake = self.discriminator(self.fake_A, self.options, reuse=False, name="discriminatorA")
         self.g_loss_a2b = self.criterionGAN(self.DB_fake, tf.ones_like(self.DB_fake)) \
-                          + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
-                          + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
+            + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
+            + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
         self.g_loss_b2a = self.criterionGAN(self.DA_fake, tf.ones_like(self.DA_fake)) \
-                          + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
-                          + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
+            + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
+            + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
         self.g_loss = self.criterionGAN(self.DA_fake, tf.ones_like(self.DA_fake)) \
-                      + self.criterionGAN(self.DB_fake, tf.ones_like(self.DB_fake)) \
-                      + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
-                      + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
+            + self.criterionGAN(self.DB_fake, tf.ones_like(self.DB_fake)) \
+            + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
+            + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
 
         self.fake_A_sample = tf.placeholder(tf.float32,
                                             [None, self.image_size, self.image_size,
@@ -169,8 +168,8 @@ class cyclegan(object):
                 self.writer.add_summary(summary_str, counter)
 
                 counter += 1
-                print(("Epoch: [%2d] [%4d/%4d] time: %4.4f" \
-                       % (epoch, idx, batch_idxs, time.time() - start_time)))
+                print(("Epoch: [%2d] [%4d/%4d] time: %4.4f" % (
+                    epoch, idx, batch_idxs, time.time() - start_time)))
 
                 if np.mod(counter, args.print_freq) == 1:
                     self.sample_model(args.sample_dir, epoch, idx)
@@ -257,8 +256,8 @@ class cyclegan(object):
             save_images(fake_img, [1, 1], image_path)
             index.write("<td>%s</td>" % os.path.basename(image_path))
             index.write("<td><img src='%s'></td>" % (sample_file if os.path.isabs(sample_file) else (
-            '..' + os.path.sep + sample_file)))
+                '..' + os.path.sep + sample_file)))
             index.write("<td><img src='%s'></td>" % (image_path if os.path.isabs(image_path) else (
-            '..' + os.path.sep + image_path)))
+                '..' + os.path.sep + image_path)))
             index.write("</tr>")
         index.close()

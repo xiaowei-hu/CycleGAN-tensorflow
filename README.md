@@ -4,12 +4,12 @@
 -->
 # CycleGAN
 
-Tensorflow implementation for learning an image-to-image translation **without** input-output pairs. (Not completed!)
+Tensorflow implementation for learning an image-to-image translation **without** input-output pairs.
 The method is proposed by [Jun-Yan Zhu](https://people.eecs.berkeley.edu/~junyanz/) in 
 [Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networkssee](https://arxiv.org/pdf/1703.10593.pdf). 
-For example:
+For example in paper:
 
-<img src="https://junyanz.github.io/CycleGAN/images/teaser_high_res.jpg" width="1000px"/>
+<img src="imgs/teaser_high_res.jpg" width="1000px"/>
 
 <!--
 ## Applications
@@ -29,6 +29,31 @@ For example:
 <img src="imgs/photo_enhancement.jpg" width="1000px"/>
 
 -->
+
+## Update
+The results of this implementation:
+
+<img src="imgs/n02381460_510.jpg" width="230px"/>
+<img src="imgs/AtoB_n02381460_510.jpg" width="230px"/>
+<img src="imgs/n02381460_4530.jpg" width="230px"/>
+<img src="imgs/AtoB_n02381460_4530.jpg" width="230px"/>
+<img src="imgs/n02381460_4660.jpg" width="230px"/>
+<img src="imgs/AtoB_n02381460_4660.jpg" width="230px"/>
+<img src="imgs/n02381460_8980.jpg" width="230px"/>
+<img src="imgs/AtoB_n02381460_8980.jpg" width="230px"/>
+
+<img src="imgs/n02391049_1760.jpg" width="230px"/>
+<img src="imgs/BtoA_n02391049_1760.jpg" width="230px"/>
+<img src="imgs/n02391049_3070.jpg" width="230px"/>
+<img src="imgs/BtoA_n02391049_3070.jpg" width="230px"/>
+<img src="imgs/n02391049_5100.jpg" width="230px"/>
+<img src="imgs/BtoA_n02391049_5100.jpg" width="230px"/>
+<img src="imgs/n02391049_7150.jpg" width="230px"/>
+<img src="imgs/BtoA_n02391049_7150.jpg" width="230px"/>
+
+You can download the pretrained model from [this](https://1drv.ms/u/s!AroAdu0uts_gj5tA93GnwyfRpvBIDA)
+and extract the rar file to `./checkpoints/`.
+
 
 ## Prerequisites
 - tensorflow r1.0 or higher version
@@ -90,13 +115,6 @@ bash ./download_dataset.sh dataset_name
 - `summer2winter_yosemite`: 1273 summer Yosemite images and 854 winter Yosemite images were downloaded using Flickr API. See more details in our paper.
 - `monet2photo`, `vangogh2photo`, `ukiyoe2photo`, `cezanne2photo`: The art images were downloaded from [Wikiart](https://www.wikiart.org/). The real photos are downloaded from Flickr using combination of tags *landscape* and *landscapephotography*. The training set size of each class is Monet:1074, Cezanne:584, Van Gogh:401, Ukiyo-e:1433, Photographs:6853.
 - `iphone2dslr_flower`: both classe of images were downlaoded from Flickr. The training set size of each class is iPhone:1813, DSLR:3316. See more details in our paper.
-
-<!--
-## Failure cases
-<img align="left" style="padding:10px" src="imgs/failure_putin.jpg" width=320>
-
-Our model does not work well when a test image looks unusual compared to training images as shown in the left figure.  See more typical failure cases [here](https://junyanz.github.io/CycleGAN/images/failures.jpg). On translation tasks that involve color and texture changes, like many of those reported above, the method often succeeds. We have also explored tasks that require geometric changes, with little success. For example, on the task of `dog<->cat` transfiguration, the learned translation degenerates to making minimal changes to the input. We also observe a lingering gap between the results achievable with paired training data and those achieved by our unpaired method. In some cases, this gap may be very hard or even impossible, to close: for example, our method sometimes permutes the labels for tree and building in the output of the cityscapes photos->labels task.
--->
 
 
 ## Reference

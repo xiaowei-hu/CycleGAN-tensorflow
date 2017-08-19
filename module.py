@@ -11,7 +11,7 @@ def discriminator(image, options, reuse=False, name="discriminator"):
         if reuse:
             tf.get_variable_scope().reuse_variables()
         else:
-            assert tf.get_variable_scope().reuse == False
+            assert tf.get_variable_scope().reuse is False
 
         h0 = lrelu(conv2d(image, options.df_dim, name='d_h0_conv'))
         # h0 is (128 x 128 x self.df_dim)
@@ -25,6 +25,7 @@ def discriminator(image, options, reuse=False, name="discriminator"):
         # h4 is (32 x 32 x 1)
         return h4
 
+
 def generator_unet(image, options, reuse=False, name="generator"):
 
     dropout_rate = 0.5 if options.is_training else 1.0
@@ -33,7 +34,7 @@ def generator_unet(image, options, reuse=False, name="generator"):
         if reuse:
             tf.get_variable_scope().reuse_variables()
         else:
-            assert tf.get_variable_scope().reuse == False
+            assert tf.get_variable_scope().reuse is False
 
         # image is (256 x 256 x input_c_dim)
         e1 = instance_norm(conv2d(image, options.gf_dim, name='g_e1_conv'))
@@ -97,7 +98,7 @@ def generator_resnet(image, options, reuse=False, name="generator"):
         if reuse:
             tf.get_variable_scope().reuse_variables()
         else:
-            assert tf.get_variable_scope().reuse == False
+            assert tf.get_variable_scope().reuse is False
 
         def residule_block(x, dim, ks=3, s=1, name='res'):
             p = int((ks - 1) / 2)
@@ -107,7 +108,6 @@ def generator_resnet(image, options, reuse=False, name="generator"):
             y = instance_norm(conv2d(y, dim, ks, s, padding='VALID', name=name+'_c2'), name+'_bn2')
             return y + x
 
-        s = options.image_size
         # Justin Johnson's model from https://github.com/jcjohnson/fast-neural-style/
         # The network with 9 blocks consists of: c7s1-32, d64, d128, R128, R128, R128,
         # R128, R128, R128, R128, R128, R128, u64, u32, c7s1-3
@@ -135,11 +135,14 @@ def generator_resnet(image, options, reuse=False, name="generator"):
 
         return pred
 
+
 def abs_criterion(in_, target):
     return tf.reduce_mean(tf.abs(in_ - target))
 
+
 def mae_criterion(in_, target):
     return tf.reduce_mean((in_-target)**2)
+
 
 def sce_criterion(logits, labels):
     return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels))
