@@ -9,7 +9,7 @@ The method is proposed by [Jun-Yan Zhu](https://people.eecs.berkeley.edu/~junyan
 [Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networkssee](https://arxiv.org/pdf/1703.10593.pdf). 
 For example in paper:
 
-<img src="imgs/teaser_high_res.jpg" width="1000px"/>
+<img src="imgs/teaser.jpg" width="1000px"/>
 
 <!--
 ## Applications
