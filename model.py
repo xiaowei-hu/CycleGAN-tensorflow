@@ -132,10 +132,11 @@ class cyclegan(object):
         counter = 1
         start_time = time.time()
 
-        if args.continue_train and self.load(args.checkpoint_dir):
-            print(" [*] Load SUCCESS")
-        else:
-            print(" [!] Load failed...")
+        if args.continue_train:
+            if self.load(args.checkpoint_dir):
+                print(" [*] Load SUCCESS")
+            else:
+                print(" [!] Load failed...")
 
         for epoch in range(args.epoch):
             dataA = glob('./datasets/{}/*.*'.format(self.dataset_dir + '/trainA'))
