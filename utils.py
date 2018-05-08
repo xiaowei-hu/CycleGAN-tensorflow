@@ -126,7 +126,7 @@ def inverse_transform(images):
 	
 
 
-def crop_and_resize(imageIn, topLeftX, topLeftY, objectWidth, objectHeight, targetWidth, targetHeight)
+def crop_and_resize(imageIn, topLeftX, topLeftY, objectWidth, objectHeight, targetWidth, targetHeight):
 	#--First we Crop, then we Resize
 	#--Crop: (Uses PIL)
 	#croppedImage = imageIn.crop(topLeftX,topLeftY, objectWidth, objectHeight)
