@@ -8,6 +8,7 @@ from collections import namedtuple
 
 from module import *
 from utils import *
+import horovod.tensorflow as hvd
 
 
 class cyclegan(object):
@@ -47,15 +48,22 @@ class cyclegan(object):
                                         name='real_A_and_B_images')
 
         self.real_A = self.real_data[:, :, :, :self.input_c_dim]
-        self.real_B = self.real_data[:, :, :, self.input_c_dim:self.input_c_dim + self.output_c_dim]
+        self.real_B = self.real_data[:, :, :,
+                                     self.input_c_dim:self.input_c_dim + self.output_c_dim]
 
-        self.fake_B = self.generator(self.real_A, self.options, False, name="generatorA2B")
-        self.fake_A_ = self.generator(self.fake_B, self.options, False, name="generatorB2A")
-        self.fake_A = self.generator(self.real_B, self.options, True, name="generatorB2A")
-        self.fake_B_ = self.generator(self.fake_A, self.options, True, name="generatorA2B")
+        self.fake_B = self.generator(
+            self.real_A, self.options, False, name="generatorA2B")
+        self.fake_A_ = self.generator(
+            self.fake_B, self.options, False, name="generatorB2A")
+        self.fake_A = self.generator(
+            self.real_B, self.options, True, name="generatorB2A")
+        self.fake_B_ = self.generator(
+            self.fake_A, self.options, True, name="generatorA2B")
 
-        self.DB_fake = self.discriminator(self.fake_B, self.options, reuse=False, name="discriminatorB")
-        self.DA_fake = self.discriminator(self.fake_A, self.options, reuse=False, name="discriminatorA")
+        self.DB_fake = self.discriminator(
+            self.fake_B, self.options, reuse=False, name="discriminatorB")
+        self.DA_fake = self.discriminator(
+            self.fake_A, self.options, reuse=False, name="discriminatorA")
         self.g_loss_a2b = self.criterionGAN(self.DB_fake, tf.ones_like(self.DB_fake)) \
             + self.L1_lambda * abs_criterion(self.real_A, self.fake_A_) \
             + self.L1_lambda * abs_criterion(self.real_B, self.fake_B_)
@@ -73,30 +81,43 @@ class cyclegan(object):
         self.fake_B_sample = tf.placeholder(tf.float32,
                                             [None, self.image_size, self.image_size,
                                              self.output_c_dim], name='fake_B_sample')
-        self.DB_real = self.discriminator(self.real_B, self.options, reuse=True, name="discriminatorB")
-        self.DA_real = self.discriminator(self.real_A, self.options, reuse=True, name="discriminatorA")
-        self.DB_fake_sample = self.discriminator(self.fake_B_sample, self.options, reuse=True, name="discriminatorB")
-        self.DA_fake_sample = self.discriminator(self.fake_A_sample, self.options, reuse=True, name="discriminatorA")
+        self.DB_real = self.discriminator(
+            self.real_B, self.options, reuse=True, name="discriminatorB")
+        self.DA_real = self.discriminator(
+            self.real_A, self.options, reuse=True, name="discriminatorA")
+        self.DB_fake_sample = self.discriminator(
+            self.fake_B_sample, self.options, reuse=True, name="discriminatorB")
+        self.DA_fake_sample = self.discriminator(
+            self.fake_A_sample, self.options, reuse=True, name="discriminatorA")
 
-        self.db_loss_real = self.criterionGAN(self.DB_real, tf.ones_like(self.DB_real))
-        self.db_loss_fake = self.criterionGAN(self.DB_fake_sample, tf.zeros_like(self.DB_fake_sample))
+        self.db_loss_real = self.criterionGAN(
+            self.DB_real, tf.ones_like(self.DB_real))
+        self.db_loss_fake = self.criterionGAN(
+            self.DB_fake_sample, tf.zeros_like(self.DB_fake_sample))
         self.db_loss = (self.db_loss_real + self.db_loss_fake) / 2
-        self.da_loss_real = self.criterionGAN(self.DA_real, tf.ones_like(self.DA_real))
-        self.da_loss_fake = self.criterionGAN(self.DA_fake_sample, tf.zeros_like(self.DA_fake_sample))
+        self.da_loss_real = self.criterionGAN(
+            self.DA_real, tf.ones_like(self.DA_real))
+        self.da_loss_fake = self.criterionGAN(
+            self.DA_fake_sample, tf.zeros_like(self.DA_fake_sample))
         self.da_loss = (self.da_loss_real + self.da_loss_fake) / 2
         self.d_loss = self.da_loss + self.db_loss
 
         self.g_loss_a2b_sum = tf.summary.scalar("g_loss_a2b", self.g_loss_a2b)
         self.g_loss_b2a_sum = tf.summary.scalar("g_loss_b2a", self.g_loss_b2a)
         self.g_loss_sum = tf.summary.scalar("g_loss", self.g_loss)
-        self.g_sum = tf.summary.merge([self.g_loss_a2b_sum, self.g_loss_b2a_sum, self.g_loss_sum])
+        self.g_sum = tf.summary.merge(
+            [self.g_loss_a2b_sum, self.g_loss_b2a_sum, self.g_loss_sum])
         self.db_loss_sum = tf.summary.scalar("db_loss", self.db_loss)
         self.da_loss_sum = tf.summary.scalar("da_loss", self.da_loss)
         self.d_loss_sum = tf.summary.scalar("d_loss", self.d_loss)
-        self.db_loss_real_sum = tf.summary.scalar("db_loss_real", self.db_loss_real)
-        self.db_loss_fake_sum = tf.summary.scalar("db_loss_fake", self.db_loss_fake)
-        self.da_loss_real_sum = tf.summary.scalar("da_loss_real", self.da_loss_real)
-        self.da_loss_fake_sum = tf.summary.scalar("da_loss_fake", self.da_loss_fake)
+        self.db_loss_real_sum = tf.summary.scalar(
+            "db_loss_real", self.db_loss_real)
+        self.db_loss_fake_sum = tf.summary.scalar(
+            "db_loss_fake", self.db_loss_fake)
+        self.da_loss_real_sum = tf.summary.scalar(
+            "da_loss_real", self.da_loss_real)
+        self.da_loss_fake_sum = tf.summary.scalar(
+            "da_loss_fake", self.da_loss_fake)
         self.d_sum = tf.summary.merge(
             [self.da_loss_sum, self.da_loss_real_sum, self.da_loss_fake_sum,
              self.db_loss_sum, self.db_loss_real_sum, self.db_loss_fake_sum,
@@ -109,13 +130,16 @@ class cyclegan(object):
         self.test_B = tf.placeholder(tf.float32,
                                      [None, self.image_size, self.image_size,
                                       self.output_c_dim], name='test_B')
-        self.testB = self.generator(self.test_A, self.options, True, name="generatorA2B")
-        self.testA = self.generator(self.test_B, self.options, True, name="generatorB2A")
+        self.testB = self.generator(
+            self.test_A, self.options, True, name="generatorA2B")
+        self.testA = self.generator(
+            self.test_B, self.options, True, name="generatorB2A")
 
         t_vars = tf.trainable_variables()
         self.d_vars = [var for var in t_vars if 'discriminator' in var.name]
         self.g_vars = [var for var in t_vars if 'generator' in var.name]
-        for var in t_vars: print(var.name)
+        for var in t_vars:
+            print(var.name)
 
     def train(self, args):
         """Train cyclegan"""
@@ -124,6 +148,10 @@ class cyclegan(object):
             .minimize(self.d_loss, var_list=self.d_vars)
         self.g_optim = tf.train.AdamOptimizer(self.lr, beta1=args.beta1) \
             .minimize(self.g_loss, var_list=self.g_vars)
+
+        # Horovod: add Horovod Distributed Optimizer.
+        self.d_optim = hvd.DistributedOptimizer(self.d_optim)
+        self.g_optim = hvd.DistributedOptimizer(self.g_optim)
 
         init_op = tf.global_variables_initializer()
         self.sess.run(init_op)
@@ -139,17 +167,22 @@ class cyclegan(object):
                 print(" [!] Load failed...")
 
         for epoch in range(args.epoch):
-            dataA = glob('./datasets/{}/*.*'.format(self.dataset_dir + '/trainA'))
-            dataB = glob('./datasets/{}/*.*'.format(self.dataset_dir + '/trainB'))
+            dataA = glob(
+                './datasets/{}/*.*'.format(self.dataset_dir + '/trainA'))
+            dataB = glob(
+                './datasets/{}/*.*'.format(self.dataset_dir + '/trainB'))
             np.random.shuffle(dataA)
             np.random.shuffle(dataB)
-            batch_idxs = min(min(len(dataA), len(dataB)), args.train_size) // self.batch_size
-            lr = args.lr if epoch < args.epoch_step else args.lr*(args.epoch-epoch)/(args.epoch-args.epoch_step)
+            batch_idxs = min(min(len(dataA), len(dataB)),
+                             args.train_size) // self.batch_size
+            lr = args.lr if epoch < args.epoch_step else args.lr * \
+                (args.epoch-epoch)/(args.epoch-args.epoch_step)
 
             for idx in range(0, batch_idxs):
                 batch_files = list(zip(dataA[idx * self.batch_size:(idx + 1) * self.batch_size],
                                        dataB[idx * self.batch_size:(idx + 1) * self.batch_size]))
-                batch_images = [load_train_data(batch_file, args.load_size, args.fine_size) for batch_file in batch_files]
+                batch_images = [load_train_data(
+                    batch_file, args.load_size, args.fine_size) for batch_file in batch_files]
                 batch_images = np.array(batch_images).astype(np.float32)
 
                 # Update G network and record fake outputs
@@ -199,7 +232,8 @@ class cyclegan(object):
         ckpt = tf.train.get_checkpoint_state(checkpoint_dir)
         if ckpt and ckpt.model_checkpoint_path:
             ckpt_name = os.path.basename(ckpt.model_checkpoint_path)
-            self.saver.restore(self.sess, os.path.join(checkpoint_dir, ckpt_name))
+            self.saver.restore(self.sess, os.path.join(
+                checkpoint_dir, ckpt_name))
             return True
         else:
             return False
@@ -209,8 +243,10 @@ class cyclegan(object):
         dataB = glob('./datasets/{}/*.*'.format(self.dataset_dir + '/testB'))
         np.random.shuffle(dataA)
         np.random.shuffle(dataB)
-        batch_files = list(zip(dataA[:self.batch_size], dataB[:self.batch_size]))
-        sample_images = [load_train_data(batch_file, is_testing=True) for batch_file in batch_files]
+        batch_files = list(
+            zip(dataA[:self.batch_size], dataB[:self.batch_size]))
+        sample_images = [load_train_data(
+            batch_file, is_testing=True) for batch_file in batch_files]
         sample_images = np.array(sample_images).astype(np.float32)
 
         fake_A, fake_B = self.sess.run(
@@ -227,9 +263,11 @@ class cyclegan(object):
         init_op = tf.global_variables_initializer()
         self.sess.run(init_op)
         if args.which_direction == 'AtoB':
-            sample_files = glob('./datasets/{}/*.*'.format(self.dataset_dir + '/testA'))
+            sample_files = glob(
+                './datasets/{}/*.*'.format(self.dataset_dir + '/testA'))
         elif args.which_direction == 'BtoA':
-            sample_files = glob('./datasets/{}/*.*'.format(self.dataset_dir + '/testB'))
+            sample_files = glob(
+                './datasets/{}/*.*'.format(self.dataset_dir + '/testB'))
         else:
             raise Exception('--which_direction must be AtoB or BtoA')
 
@@ -239,7 +277,8 @@ class cyclegan(object):
             print(" [!] Load failed...")
 
         # write html for visual comparison
-        index_path = os.path.join(args.test_dir, '{0}_index.html'.format(args.which_direction))
+        index_path = os.path.join(
+            args.test_dir, '{0}_index.html'.format(args.which_direction))
         index = open(index_path, "w")
         index.write("<html><body><table><tr>")
         index.write("<th>name</th><th>input</th><th>output</th></tr>")
