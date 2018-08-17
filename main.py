@@ -91,9 +91,10 @@ def main(_):
 
     tfconfig = tf.ConfigProto(allow_soft_placement=True)
     tfconfig.gpu_options.allow_growth = True
+
     # Config protos for Horovod
-    config.gpu_options.visible_device_list = str(hvd.local_rank())
-    with tf.Session(config=tfconfig, hooks=hooks, checkpoint_dir=checkpoint_dir) as sess:
+    tfconfig.gpu_options.visible_device_list = str(hvd.local_rank())
+    with tf.MonitoredTrainingSession(config=tfconfig, hooks=hooks, checkpoint_dir=checkpoint_dir) as sess:
         model = cyclegan(sess, args)
         model.train(args) if args.phase == 'train' \
             else model.test(args)
