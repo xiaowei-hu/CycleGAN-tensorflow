@@ -10,8 +10,10 @@ parser.add_argument('--epoch', dest='epoch', type=int, default=200, help='# of e
 parser.add_argument('--epoch_step', dest='epoch_step', type=int, default=100, help='# of epoch to decay lr')
 parser.add_argument('--batch_size', dest='batch_size', type=int, default=1, help='# images in batch')
 parser.add_argument('--train_size', dest='train_size', type=int, default=1e8, help='# images used to train')
-parser.add_argument('--load_size', dest='load_size', type=int, default=286, help='scale images to this size')
-parser.add_argument('--fine_size', dest='fine_size', type=int, default=256, help='then crop to this size')
+parser.add_argument('--load_height', dest='load_height', type=int, default=258, help='scale images to this size')
+parser.add_argument('--load_width', dest='load_width', type=int, default=514, help='scale images to this size')
+parser.add_argument('--fine_height', dest='fine_height', type=int, default=256, help='then crop to this size')
+parser.add_argument('--fine_width', dest='fine_width', type=int, default=512, help='then crop to this size')
 parser.add_argument('--ngf', dest='ngf', type=int, default=64, help='# of gen filters in first conv layer')
 parser.add_argument('--ndf', dest='ndf', type=int, default=64, help='# of discri filters in first conv layer')
 parser.add_argument('--input_nc', dest='input_nc', type=int, default=3, help='# of input image channels')
@@ -42,8 +44,8 @@ def main(_):
     if not os.path.exists(args.test_dir):
         os.makedirs(args.test_dir)
 
-    tfconfig = tf.ConfigProto(allow_soft_placement=True)
-    tfconfig.gpu_options.allow_growth = True
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction = 0.95, allow_growth = False)
+    tfconfig = tf.ConfigProto(allow_soft_placement=True, gpu_options = gpu_options)
     with tf.Session(config=tfconfig) as sess:
         model = cyclegan(sess, args)
         model.train(args) if args.phase == 'train' \
